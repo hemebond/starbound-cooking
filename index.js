@@ -2,6 +2,24 @@ var inventory = new Array();
 var items_ingredients = new Array();
 var items_recipes = new Array();
 
+var effectNames = {
+	'health': 'Bonus Health',
+	'energy': 'Bonus Energy',
+	'burning': 'Burning',
+	'jump': 'Jump Boost',
+	'nova': 'Nova',
+	'thorns': 'Thorns',
+	'rage': 'Rage',
+	'run': 'Run Boost',
+	'poisoned': 'Poisoned',
+	'light': 'Light'
+}
+
+
+
+
+
+
 // Go through all the data and create lists for future use
 for (var item in foodItems) {
 	if ("ingredients" in foodItems[item]) {
@@ -21,6 +39,8 @@ for (var item in foodItems) {
 		}
 	}
 }
+items_ingredients.sort();
+items_recipes.sort();
 
 
 
@@ -169,27 +189,41 @@ function makeRecipeCard(recipeId, parentElementId) {
 	var recipeName = recipe.name ? recipe.name : recipeId;
 	var ingredients = Object.keys(recipe.ingredients);
 	var rawIngredients = Object.keys(recipe.rawIngredients);
+	var panel = '';
 
-	var panel = '<div class="panel panel-default">\
-	                 <div class="panel-heading"\
-	                      id="recipe-panel-head-' + recipeId +'"\
-	                      role="tab">\
-	                     <h4 class="panel-title">\
-	                         <a role="button"\
-	                            data-toggle="collapse"\
-	                            data-parent="#'+ parentElementId +'"\
-	                            href="#recipe-panel-body-'+ recipeId +'"\
-	                            aria-controls="recipe-panel-body-'+ recipeId +'">\
-	                             <img src="images/ingredients/'+ recipeId +'.png">'+ recipeName +'</a>\
-	                     </h4>\
-	                 </div>';
+	panel += '<div class="panel panel-default">\
+	              <div class="panel-heading"\
+	                   id="recipe-panel-head-' + recipeId +'"\
+	                   role="tab">\
+	                  <h4 class="panel-title">\
+	                      <a role="button"\
+	                         data-toggle="collapse"\
+	                         data-parent="#'+ parentElementId +'"\
+	                         href="#recipe-panel-body-'+ recipeId +'"\
+	                         aria-controls="recipe-panel-body-'+ recipeId +'">\
+	                          <img src="images/ingredients/'+ recipeId +'.png">'+ recipeName +'</a>\
+	                  </h4>\
+	              </div>';
 
 	panel += '<div id="recipe-panel-body-' + recipeId + '"\
 	               class="panel-collapse collapse"\
 	               role="tabpanel"\
 	               aria-labelledby="recipe-panel-head-' + recipeId + '">\
-	                   <div class="panel-body">\
-	                       <div class="panel panel-default">\
+	                   <div class="panel-body">';
+
+	panel += '<div class="panel panel-default">\
+	              <div class="panel-heading">\
+	                  Status Effects\
+	              </div>\
+	              <ul class="list-group">';
+	for (var effectId in recipe.effects) {
+		var effect = recipe.effects[effectId];
+
+		panel += '<li class="list-group-item"><img src="images/effects/'+ effectId +'.png">'+ effectNames[effectId] +' '+ (effect.bonus || '') +' ('+ effect.time +'s)</li>';
+	}
+	panel += '</ul></div>';
+
+	panel += '             <div class="panel panel-default">\
 	                           <div class="panel-heading">\
 	                               Ingredients\
 	                           </div>\
