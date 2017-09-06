@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<title>Starbound Cooking Guide</title>
+		<link rel="stylesheet" href="css/bootstrap.css">
+		<link rel="stylesheet" href="index.css">
+	</head>
+	<body>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-3">
+					<div class="panel panel-default">
+						<div class="panel-heading">Ingredients</div>
+						<div class="panel-body">
+							Click on an item to add it to your inventory.
+						</div>
+						<div id="ingredientItems" class="list-group"></div>
+					</div>
+				</div>
+				<div class="col-md-3">
+					<div class="panel panel-default">
+						<div class="panel-heading">Inventory</div>
+						<div class="panel-body">
+							Click on an item to remove it from your inventory.
+						</div>
+						<div id="inventory" class="list-group"></div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<h1>Full</h1>
+					<div class="panel-group" id="recipesFull" role="tablist" aria-multiselectable="true"></div>
+					<h1>Partial</h1>
+					<div class="panel-group" id="recipesPartial" role="tablist" aria-multiselectable="true"></div>
+				</div>
+			</div>
+		</div>
+
+		<script src="js/jquery-3.2.1.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script src="data.js"></script>
+		<script src="index.js"></script>
+	</body>
+</html>
