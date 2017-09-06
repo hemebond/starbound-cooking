@@ -1,4 +1,6 @@
 .list-group-item img {
+	width: 36px;
+	height: 36px;
 	margin-right: 1em;
 }
 
@@ -7,5 +9,10 @@
 }
 
 .panel-title a img {
+	width: 36px;
+	height: 36px;
 	margin-right: 1em;
+}
+body {
+	margin-top: 1em;
 }

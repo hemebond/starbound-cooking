@@ -1,4 +1,4 @@
-var foodItems = {
+var gameItems = {
   "alien_fruit": {
     "name": "Alien Fruit"
   },
@@ -170,6 +170,7 @@ var foodItems = {
     }
   },
   "baked_potato": {
+    "name": "Baked Potato",
     "ingredients": {
       "potato": 1
     }
@@ -875,6 +876,7 @@ var foodItems = {
     "name": "Corn Cob"
   },
   "corn_peckers": {
+    "name": "Corn Peckers",
     "category": "main",
     "effects": {
       "health": {
@@ -975,6 +977,7 @@ var foodItems = {
     "name": "Eggshoot Salad"
   },
   "eggy_toast": {
+    "name": "Eggy Toast",
     "ingredients": {
       "bread": 1,
       "egg": 1
@@ -1054,6 +1057,7 @@ var foodItems = {
     "name": "Fish and Chips"
   },
   "fish_dumplings": {
+    "name": "Fish Dumplings",
     "category": "main",
     "effects": {
       "health": {
@@ -1067,6 +1071,7 @@ var foodItems = {
     }
   },
   "fish_fingers": {
+    "name": "Fish Fingers",
     "category": "main",
     "effects": {
       "health": {
@@ -1790,6 +1795,7 @@ var foodItems = {
     "name": "Pizzap Slice"
   },
   "popcorn": {
+    "name": "Popcorn",
     "ingredients": {
       "corn": 1
     }
@@ -1812,6 +1818,7 @@ var foodItems = {
     "name": "Potato"
   },
   "potato_grids": {
+    "name": "Potato Grids",
     "ingredients": {
       "mashed_potato": 2
     }

@@ -21,10 +21,10 @@ var effectNames = {
 
 
 // Go through all the data and create lists for future use
-for (var item in foodItems) {
-	if ("ingredients" in foodItems[item]) {
+for (var item in gameItems) {
+	if ("ingredients" in gameItems[item]) {
 		// create a list of items that are ingredients for other items
-		for (ingredient in foodItems[item]['ingredients']) {
+		for (ingredient in gameItems[item]['ingredients']) {
 			if (items_ingredients.indexOf(ingredient) < 0) {
 				items_ingredients.push(ingredient);
 			}
@@ -34,8 +34,8 @@ for (var item in foodItems) {
 		items_recipes.push(item);
 
 		// add the raw ingredients to the item data
-		if (foodItems[item]['rawIngredients'] === undefined) {
-			foodItems[item]['rawIngredients'] = getRawIngredients(item);
+		if (gameItems[item]['rawIngredients'] === undefined) {
+			gameItems[item]['rawIngredients'] = getRawIngredients(item);
 		}
 	}
 }
@@ -44,46 +44,42 @@ items_recipes.sort();
 
 
 
-function findRecipe(inventoryItems = []) {
-	var matchesFull = [];
-	var matchesPartial = [];
+function findRecipes(inventoryItems) {
+	var completeMatches = [];
+	var partialMatches = [];
 
-	for (var i in items_recipes) {
-		var recipeName = items_recipes[i];
+	for (var recipeId of items_recipes) {
+		var recipe = gameItems[recipeId];
 
-		var recipeIngredients = Object.keys(foodItems[recipeName]['ingredients']);
-		var rawIngredients = Object.keys(foodItems[recipeName].rawIngredients);
+		var matchTally = 0;
+		var rawMatchTally = 0;
 
-		var partial_match = false;
-		var match_tally = 0;
-
-		for (var r=0; r < inventoryItems.length; r++) {
-			var ingredient = inventoryItems[r];
-
-			if (recipeIngredients.indexOf(ingredient) >= 0 || rawIngredients.indexOf(ingredient) >= 0) {
-				partial_match = true;
-				match_tally++;
+		for (var inventoryItemId of inventoryItems) {
+			if (inventoryItemId in recipe.ingredients) {
+				matchTally++;
+			}
+			else if (inventoryItemId in (recipe.rawIngredients || [])) {
+				rawMatchTally++;
 			}
 		}
-		if (match_tally == recipeIngredients.length) {
-			if (matchesFull.indexOf(recipeName) < 0) {
-				matchesFull.push(recipeName);
-			}
+
+		if (matchTally == Object.keys(recipe.ingredients).length || rawMatchTally == Object.keys(recipe.rawIngredients).length) {
+			completeMatches.push(recipeId);
 		}
-		else if (partial_match) {
-			if (matchesPartial.indexOf(recipeName) < 0) {
-				matchesPartial.push(recipeName);
-			}
+		else if (matchTally > 0 || rawMatchTally > 0) {
+			partialMatches.push(recipeId);
 		}
 	}
 
-	updateMatchList(matchesFull);
-	updatePartialMatchList(matchesPartial);
+	return {
+		'complete': completeMatches,
+		'partial': partialMatches
+	}
 }
 
 
-function getRawIngredients(itemName) {
-	var ingredients = foodItems[itemName]['ingredients'];
+function getRawIngredients(itemId) {
+	var ingredients = gameItems[itemId]['ingredients'];
 	if (ingredients == undefined) {
 		// the item has no ingredients
 		return null;
@@ -119,7 +115,7 @@ function updateIngredientItemList() {
 
 		ingredientButtons += '<a class="list-group-item" data-ingredient="'+ ingredientId +'">\
 		                          <img src="images/ingredients/'+ ingredientId +'.png">\
-		                          <span>'+ foodItems[ingredientId].name +'</span>\
+		                          <span>'+ gameItems[ingredientId].name +'</span>\
 		                          <i class="glyphicon glyphicon-chevron-right pull-right"></i>\
 		                      </a>';
 	}
@@ -128,36 +124,24 @@ function updateIngredientItemList() {
 }
 updateIngredientItemList();
 
-$('#ingredientItems').on('click', 'a', function() {
-	var itemId = $(this).data('ingredient');
-	if (inventory.indexOf(itemId) < 0) {
-		inventory.push(itemId);
-		updateInventoryList();
-	}
-});
 
 
 function updateInventoryList() {
 	var buttons = '';
 	for (var i=0; i < inventory.length; i++) {
 		var itemId = inventory[i];
-		var item = foodItems[itemId];
+		var item = gameItems[itemId];
 		var itemName = item.name ? item.name : itemId;
 
 		buttons += '<a class="list-group-item" data-ingredient="'+ itemId +'"><img src="images/ingredients/'+ itemId +'.png">'+ itemName +'</a>';
 	}
 
 	$('#inventory').html(buttons);
-	findRecipe(inventory);
+	var recipes = findRecipes(inventory);
+	updateMatchList(recipes.complete);
+	updatePartialMatchList(recipes.partial);
 }
-$('#inventory').on('click', 'a', function() {
-	var itemId = $(this).data('ingredient');
-	var index = inventory.indexOf(itemId);
-	if (index > -1) {
-		inventory.splice(index, 1);
-	}
-	updateInventoryList();
-});
+
 
 
 function updateMatchList(recipes) {
@@ -185,7 +169,7 @@ function updatePartialMatchList(recipes) {
 
 
 function makeRecipeCard(recipeId, parentElementId) {
-	var recipe = foodItems[recipeId];
+	var recipe = gameItems[recipeId];
 	var recipeName = recipe.name ? recipe.name : recipeId;
 	var ingredients = Object.keys(recipe.ingredients);
 	var rawIngredients = Object.keys(recipe.rawIngredients);
@@ -211,17 +195,19 @@ function makeRecipeCard(recipeId, parentElementId) {
 	               aria-labelledby="recipe-panel-head-' + recipeId + '">\
 	                   <div class="panel-body">';
 
-	panel += '<div class="panel panel-default">\
-	              <div class="panel-heading">\
-	                  Status Effects\
-	              </div>\
-	              <ul class="list-group">';
-	for (var effectId in recipe.effects) {
-		var effect = recipe.effects[effectId];
+	if ('effects' in recipe) {
+		panel += '<div class="panel panel-default">\
+		              <div class="panel-heading">\
+		                  Status Effects\
+		              </div>\
+		              <ul class="list-group">';
+		for (var effectId in recipe.effects) {
+			var effect = recipe.effects[effectId];
 
-		panel += '<li class="list-group-item"><img src="images/effects/'+ effectId +'.png">'+ effectNames[effectId] +' '+ (effect.bonus || '') +' ('+ effect.time +'s)</li>';
+			panel += '<li class="list-group-item"><img src="images/effects/'+ effectId +'.png">'+ effectNames[effectId] +' '+ (effect.bonus || '') +' ('+ effect.time +'s)</li>';
+		}
+		panel += '</ul></div>';
 	}
-	panel += '</ul></div>';
 
 	panel += '             <div class="panel panel-default">\
 	                           <div class="panel-heading">\
@@ -230,22 +216,51 @@ function makeRecipeCard(recipeId, parentElementId) {
 	                           <ul class="list-group">';
 	for (var j=0; j < ingredients.length; j++) {
 		var ingredientId = ingredients[j];
-		var ingredientName = foodItems[ingredientId].name;
+		var ingredientName = gameItems[ingredientId].name;
 		panel += '<li class="list-group-item"><img src="images/ingredients/' + ingredientId + '.png">' + ingredientName + '</li>';
 	}
 	panel += '</ul></div>';
-	panel += '<div class="panel panel-default">\
-	              <div class="panel-heading">\
-	                  Raw Ingredients\
-	              </div>\
-	              <div class="panel-body">\
-	                  <p>';
-	for (var k=0; k < rawIngredients.length; k++) {
-		var rawIngredientId = rawIngredients[k];
-		var rawIngredientName = foodItems[rawIngredientId].name;
-		panel += '<img alt="'+ rawIngredientName +'" src="images/ingredients/'+ rawIngredients[k] +'.png" title="'+ rawIngredientName +'">';
+
+	if ('rawIngredients' in recipe) {
+		panel += '<div class="panel panel-default">\
+		              <div class="panel-heading">\
+		                  Raw Ingredients\
+		              </div>\
+		              <div class="panel-body">\
+		                  <p>';
+		for (var k=0; k < rawIngredients.length; k++) {
+			var rawIngredientId = rawIngredients[k];
+			var rawIngredientName = gameItems[rawIngredientId].name;
+			panel += '<img alt="'+ rawIngredientName +'" src="images/ingredients/'+ rawIngredients[k] +'.png" title="'+ rawIngredientName +'">';
+		}
+		panel += '</p></div></div>';
 	}
-	panel += '</p></div></div></div></div></div>';
+	panel += '</div></div></div>';
+
+	panel.replace(/ +/g, ' ');
 
 	return panel;
 }
+
+/*
+ * Attach the event listeners
+ */
+$('#ingredientItems').on('click', 'a', function() {
+	// Add the item to the inventory list and update the page
+
+	var itemId = $(this).data('ingredient');
+	if (inventory.indexOf(itemId) < 0) {
+		inventory.push(itemId);
+		updateInventoryList();
+	}
+});
+$('#inventory').on('click', 'a', function() {
+	//  Remove the item from the inventory and update the page
+
+	var itemId = $(this).data('ingredient');
+	var index = inventory.indexOf(itemId);
+	if (index > -1) {
+		inventory.splice(index, 1);
+	}
+	updateInventoryList();
+});
