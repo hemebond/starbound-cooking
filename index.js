@@ -39,8 +39,8 @@ for (var item in gameItems) {
 		}
 	}
 }
-items_ingredients.sort();
-items_recipes.sort();
+var ingredientList = items_ingredients.sort();
+var allRecipes = items_recipes.sort();
 
 
 
@@ -58,7 +58,7 @@ function findRecipes(inventoryItems) {
 			if (inventoryItemId in recipe.ingredients) {
 				matchTally++;
 			}
-			else if (inventoryItemId in (recipe.rawIngredients || [])) {
+			if (inventoryItemId in (recipe.rawIngredients || [])) {
 				rawMatchTally++;
 			}
 		}
@@ -107,26 +107,23 @@ function getRawIngredients(itemId) {
 }
 
 
-function updateIngredientItemList() {
+function updateIngredientItemList(items) {
 	var ingredientButtons = '';
 
-	for (var i=0; i < items_ingredients.length; i++) {
-		var ingredientId = items_ingredients[i];
-
-		ingredientButtons += '<a class="list-group-item" data-ingredient="'+ ingredientId +'">\
-		                          <img src="images/ingredients/'+ ingredientId +'.png">\
-		                          <span>'+ gameItems[ingredientId].name +'</span>\
+	for (var itemId of items.sort()) {
+		ingredientButtons += '<a class="list-group-item" data-ingredient="'+ itemId +'">\
+		                          <img src="images/ingredients/'+ itemId +'.png">\
+		                          <span>'+ gameItems[itemId].name +'</span>\
 		                          <i class="glyphicon glyphicon-chevron-right pull-right"></i>\
 		                      </a>';
 	}
-
 	$('#ingredientItems').html(ingredientButtons);
 }
-updateIngredientItemList();
+updateIngredientItemList(ingredientList);
 
 
 
-function updateInventoryList() {
+function updateInventoryList(items=[]) {
 	var buttons = '';
 	for (var i=0; i < inventory.length; i++) {
 		var itemId = inventory[i];
@@ -137,6 +134,13 @@ function updateInventoryList() {
 	}
 
 	$('#inventory').html(buttons);
+	updateRecipeLists();
+}
+
+function updateRecipeLists() {
+	//
+	// Update the page to show list of recipes
+	//
 	var recipes = findRecipes(inventory);
 	updateMatchList(recipes.complete);
 	updatePartialMatchList(recipes.partial);
@@ -242,25 +246,43 @@ function makeRecipeCard(recipeId, parentElementId) {
 	return panel;
 }
 
+
+function moveItemToInventory(itemId) {
+	// remove item from ingredient list
+	ingredientList.splice(ingredientList.indexOf(itemId), 1);
+	// add item to inventory list
+	inventory.push(itemId);
+}
+
+function moveItemFromInventory(itemId) {
+	// remove item from inventory list
+	inventory.splice(inventory.indexOf(itemId), 1);
+	// add item to ingredient list
+	ingredientList.push(itemId);
+}
+
+
 /*
  * Attach the event listeners
  */
 $('#ingredientItems').on('click', 'a', function() {
+	//
 	// Add the item to the inventory list and update the page
-
-	var itemId = $(this).data('ingredient');
-	if (inventory.indexOf(itemId) < 0) {
-		inventory.push(itemId);
-		updateInventoryList();
-	}
+	//
+	var element = $(this);
+	var itemId = element.data('ingredient');
+	moveItemToInventory(itemId);
+	updateInventoryList();
+	element.remove();
 });
 $('#inventory').on('click', 'a', function() {
+	//
 	//  Remove the item from the inventory and update the page
-
-	var itemId = $(this).data('ingredient');
-	var index = inventory.indexOf(itemId);
-	if (index > -1) {
-		inventory.splice(index, 1);
-	}
-	updateInventoryList();
+	//
+	var element = $(this);
+	var itemId = element.data('ingredient');
+	moveItemFromInventory(itemId);
+	updateIngredientItemList(ingredientList);
+	updateRecipeLists();
+	element.remove();
 });
