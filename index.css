@@ -1,7 +1,7 @@
 .list-group-item img {
-	width: 36px;
-	height: 36px;
+	min-width: 36px;
 	margin-right: 1em;
+	image-rendering: -moz-crisp-edges;
 }
 
 .list-group-item i {
@@ -9,8 +9,6 @@
 }
 
 .panel-title a img {
-	width: 36px;
-	height: 36px;
 	margin-right: 1em;
 }
 body {

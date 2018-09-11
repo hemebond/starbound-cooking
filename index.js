@@ -1,6 +1,6 @@
 var inventory = new Array();
-var items_ingredients = new Array();
-var items_recipes = new Array();
+var allIngredients = new Array();
+var allRecipes = new Array();
 
 var effectNames = {
 	'health': 'Bonus Health',
@@ -25,13 +25,13 @@ for (var item in gameItems) {
 	if ("ingredients" in gameItems[item]) {
 		// create a list of items that are ingredients for other items
 		for (ingredient in gameItems[item]['ingredients']) {
-			if (items_ingredients.indexOf(ingredient) < 0) {
-				items_ingredients.push(ingredient);
+			if (allIngredients.indexOf(ingredient) < 0) {
+				allIngredients.push(ingredient);
 			}
 		}
 
 		// create a list of recipes (not pure ingredients)
-		items_recipes.push(item);
+		allRecipes.push(item);
 
 		// add the raw ingredients to the item data
 		if (gameItems[item]['rawIngredients'] === undefined) {
@@ -39,8 +39,7 @@ for (var item in gameItems) {
 		}
 	}
 }
-var ingredientList = items_ingredients.sort();
-var allRecipes = items_recipes.sort();
+var ingredientList = allIngredients.sort();
 
 
 
@@ -48,7 +47,7 @@ function findRecipes(inventoryItems) {
 	var completeMatches = [];
 	var partialMatches = [];
 
-	for (var recipeId of items_recipes) {
+	for (var recipeId of allRecipes) {
 		var recipe = gameItems[recipeId];
 
 		var matchTally = 0;
@@ -114,7 +113,6 @@ function updateIngredientItemList(items) {
 		ingredientButtons += '<a class="list-group-item" data-ingredient="'+ itemId +'">\
 		                          <img src="images/ingredients/'+ itemId +'.png">\
 		                          <span>'+ gameItems[itemId].name +'</span>\
-		                          <i class="glyphicon glyphicon-chevron-right pull-right"></i>\
 		                      </a>';
 	}
 	$('#ingredientItems').html(ingredientButtons);
